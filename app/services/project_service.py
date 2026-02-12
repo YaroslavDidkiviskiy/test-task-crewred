@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models import Project, ProjectPlace
 from app.crud import project as project_crud
 from app.crud import place as place_crud
+from app.crud.base import create
 from .artic_service import get_artwork
 
 MAX_PLACES = 10
@@ -59,7 +60,7 @@ async def add_place(db: Session, project: Project, external_id: str, notes: str 
         title=artwork.get("title"),
         notes=notes,
     )
-    place_crud.create(db, place)
+    create(db, place)
 
     db.refresh(project)
     recompute_completed(project)

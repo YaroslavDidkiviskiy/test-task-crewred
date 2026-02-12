@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from app.models import ProjectPlace
-from app.crud.base import create
 
 
 def list_for_project(db: Session, project_id: int, limit: int, offset: int) -> list[ProjectPlace]:

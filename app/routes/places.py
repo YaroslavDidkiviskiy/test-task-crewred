@@ -4,7 +4,7 @@ from app.deps.db import get_db
 from app.deps.auth import verify_api_key
 from app.schemas import PlaceCreate, PlaceUpdate, PlaceOut
 from app.crud import place as place_crud
-from app.crud.base import get as base_get
+from app.crud.base import get
 from app.models import ProjectPlace, Project
 from app.services.project_service import add_place, update_place
 
@@ -154,7 +154,7 @@ def get_project_place(
     place_id: int = Path(..., description="ID of the place"),
     db: Session = Depends(get_db)
 ):
-    place = base_get(db, ProjectPlace, place_id)
+    place = get(db, ProjectPlace, place_id)
     if not place or place.project_id != project_id:
         raise HTTPException(404, "Place not found")
     return place
@@ -200,7 +200,7 @@ def patch_project_place(
     if not project:
         raise HTTPException(404, "Project not found")
 
-    place = base_get(db, ProjectPlace, place_id)
+    place = get(db, ProjectPlace, place_id)
     if not place or place.project_id != project_id:
         raise HTTPException(404, "Place not found")
 
