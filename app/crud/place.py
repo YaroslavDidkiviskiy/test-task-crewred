@@ -1,15 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from app.models import ProjectPlace
+from app.crud.base import create
 
-def create(db: Session, place: ProjectPlace) -> ProjectPlace:
-    db.add(place)
-    db.commit()
-    db.refresh(place)
-    return place
-
-def get(db: Session, place_id: int) -> ProjectPlace | None:
-    return db.get(ProjectPlace, place_id)
 
 def list_for_project(db: Session, project_id: int, limit: int, offset: int) -> list[ProjectPlace]:
     stmt = (

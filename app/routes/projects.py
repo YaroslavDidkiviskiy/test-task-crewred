@@ -5,6 +5,8 @@ from app.deps.auth import verify_api_key
 from app.schemas import ProjectCreate, ProjectUpdate, ProjectOut, ProjectDetailOut
 from app.models import Project
 from app.crud import project as project_crud
+from app.crud.base import get as base_get
+from app.models.project import Project
 from app.services.project_service import can_delete, create_project_with_places
 
 router = APIRouter(dependencies=[Depends(verify_api_key)])
@@ -146,7 +148,7 @@ def list_projects(
     }
 )
 def get_project(project_id: int = Path(..., description="ID of the project to retrieve"), db: Session = Depends(get_db)):
-    project = project_crud.get(db, project_id)
+    project = base_get(db, Project, project_id)
     if not project:
         raise HTTPException(404, "Project not found")
     return project
@@ -187,7 +189,7 @@ def update_project(
     payload: ProjectUpdate = ...,
     db: Session = Depends(get_db)
 ):
-    project = project_crud.get(db, project_id)
+    project = base_get(db, Project, project_id)
     if not project:
         raise HTTPException(404, "Project not found")
 
@@ -230,7 +232,7 @@ def update_project(
     }
 )
 def delete_project(project_id: int = Path(..., description="ID of the project to delete"), db: Session = Depends(get_db)):
-    project = project_crud.get(db, project_id)
+    project = base_get(db, Project, project_id)
     if not project:
         raise HTTPException(404, "Project not found")
     if not can_delete(project):

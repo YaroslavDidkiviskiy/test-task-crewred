@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from app.deps.db import get_db
 from app.deps.auth import verify_api_key
 from app.schemas import PlaceCreate, PlaceUpdate, PlaceOut
-from app.crud import project as project_crud
 from app.crud import place as place_crud
+from app.crud.base import get as base_get
+from app.models import ProjectPlace, Project
 from app.services.project_service import add_place, update_place
 
 router = APIRouter(dependencies=[Depends(verify_api_key)])
@@ -60,7 +61,7 @@ async def add_project_place(
     payload: PlaceCreate = ...,
     db: Session = Depends(get_db)
 ):
-    project = project_crud.get(db, project_id)
+    project = base_get(db, Project, project_id)
     if not project:
         raise HTTPException(404, "Project not found")
     return await add_place(db, project, payload.external_id, payload.notes)
@@ -112,7 +113,7 @@ def list_project_places(
     offset: int = Query(0, ge=0, description="Number of places to skip"),
     db: Session = Depends(get_db)
 ):
-    project = project_crud.get(db, project_id)
+    project = base_get(db, Project, project_id)
     if not project:
         raise HTTPException(404, "Project not found")
     return place_crud.list_for_project(db, project_id, limit=min(limit, 100), offset=offset)
@@ -153,7 +154,7 @@ def get_project_place(
     place_id: int = Path(..., description="ID of the place"),
     db: Session = Depends(get_db)
 ):
-    place = place_crud.get(db, place_id)
+    place = base_get(db, ProjectPlace, place_id)
     if not place or place.project_id != project_id:
         raise HTTPException(404, "Place not found")
     return place
@@ -195,11 +196,11 @@ def patch_project_place(
     payload: PlaceUpdate = ...,
     db: Session = Depends(get_db)
 ):
-    project = project_crud.get(db, project_id)
+    project = base_get(db, Project, project_id)
     if not project:
         raise HTTPException(404, "Project not found")
 
-    place = place_crud.get(db, place_id)
+    place = base_get(db, ProjectPlace, place_id)
     if not place or place.project_id != project_id:
         raise HTTPException(404, "Place not found")
 
