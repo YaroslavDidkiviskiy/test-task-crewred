@@ -61,7 +61,7 @@ curl -X POST "http://localhost:8000/projects" \
 
 ```bash
 # Встановіть залежності
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 
 # Запустіть сервер
 uvicorn app.main:app --reload

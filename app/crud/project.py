@@ -1,3 +1,6 @@
+from app.models.project import Project
+
+
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models import Project
@@ -13,7 +16,7 @@ def get(db: Session, project_id: int) -> Project | None:
 
 def list_all(db: Session, limit: int, offset: int) -> list[Project]:
     stmt = select(Project).order_by(Project.id.desc()).limit(limit).offset(offset)
-    return list(db.scalars(stmt).all())
+    return list[Project](db.scalars(stmt).all())
 
 def delete(db: Session, project: Project) -> None:
     db.delete(project)
