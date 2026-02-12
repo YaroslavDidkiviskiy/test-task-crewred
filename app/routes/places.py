@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
 from app.deps.db import get_db
+from app.deps.auth import verify_api_key
 from app.schemas import PlaceCreate, PlaceUpdate, PlaceOut
 from app.crud import project as project_crud
 from app.crud import place as place_crud
 from app.services.project_service import add_place, update_place
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(verify_api_key)])
 
 @router.post(
     "/{project_id}/places",

@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
 from app.deps.db import get_db
+from app.deps.auth import verify_api_key
 from app.schemas import ProjectCreate, ProjectUpdate, ProjectOut, ProjectDetailOut
 from app.models import Project
 from app.crud import project as project_crud
 from app.services.project_service import can_delete, create_project_with_places
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(verify_api_key)])
 
 @router.post(
     "",

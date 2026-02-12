@@ -24,6 +24,45 @@ RESTful API для планування подорожей та управлін
 - **Docker** та **Docker Compose** (для Docker запуску)
 - **pip** (для локального встановлення)
 
+## Конфігурація
+
+Проект використовує централізовану конфігурацію через клас `Settings` (`app/core/config.py`). Всі налаштування завантажуються з environment variables або `.env` файлу.
+
+### Змінні оточення
+
+- `DATABASE_URL` - URL бази даних (за замовчуванням: `sqlite:///./app.db`)
+- `API_KEY` - API ключ для авторизації (за замовчуванням: `dev-api-key-12345`)
+
+### Створення .env файлу (опціонально)
+
+```bash
+# Створіть .env файл в корені проекту
+DATABASE_URL=sqlite:///./data/app.db
+API_KEY=your-secret-api-key-here
+```
+
+## Авторизація
+
+API використовує просту авторизацію через **API Key**. Всі endpoints (крім `/health`) вимагають заголовок `X-API-Key`.
+
+**Дефолтний API Key для розробки:** `dev-api-key-12345`
+
+**Для production:** встановіть змінну оточення `API_KEY`:
+
+```bash
+# Локально
+export API_KEY=your-secret-api-key-here
+
+# Docker (через .env або environment)
+docker-compose up
+```
+
+**Приклад використання:**
+```bash
+curl -X GET "http://localhost:8000/projects" \
+  -H "X-API-Key: dev-api-key-12345"
+```
+
 ## Швидкий старт
 
 ### Запуск через Docker (рекомендовано)
@@ -47,6 +86,7 @@ docker-compose up --build
 ```bash
 curl -X POST "http://localhost:8000/projects" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-api-key-12345" \
   -d '{
     "name": "My Art Tour",
     "places": [
@@ -181,9 +221,12 @@ docker-compose up --build
 
 ### Health Check
 - **`GET /health`** - Перевірка стану сервісу
+  - **Не потребує авторизації**
   - Повертає: `{"status": "ok"}`
 
 ### Projects (Проекти)
+
+**Всі endpoints потребують заголовок `X-API-Key`**
 
 - **`POST /projects`** - Створити проект з місцями
   - **Обов'язково**: мінімум 1 місце в `places`
@@ -209,6 +252,8 @@ docker-compose up --build
   - Помилка: 409 якщо є відвідані місця
 
 ### Places (Місця)
+
+**Всі endpoints потребують заголовок `X-API-Key`**
 
 - **`POST /projects/{project_id}/places`** - Додати місце до проекту
   - Body: `PlaceCreate` (external_id, notes?)
@@ -241,6 +286,7 @@ docker-compose up --build
 ```bash
 curl -X POST "http://localhost:8000/projects" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-api-key-12345" \
   -d '{
     "name": "Chicago Art Tour",
     "description": "Exploring art museums in Chicago",
@@ -298,7 +344,8 @@ curl "http://localhost:8000/projects?limit=10&offset=0"
 ### Отримати проект з місцями
 
 ```bash
-curl "http://localhost:8000/projects/1"
+curl "http://localhost:8000/projects/1" \
+  -H "X-API-Key: dev-api-key-12345"
 ```
 
 ### Додати місце до проекту
@@ -308,6 +355,7 @@ curl "http://localhost:8000/projects/1"
 ```bash
 curl -X POST "http://localhost:8000/projects/1/places" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-api-key-12345" \
   -d '{
     "external_id": "27992",
     "notes": "Beautiful painting, need to see it"
@@ -321,6 +369,7 @@ curl -X POST "http://localhost:8000/projects/1/places" \
 ```bash
 curl -X PATCH "http://localhost:8000/projects/1/places/1" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-api-key-12345" \
   -d '{
     "visited": true,
     "notes": "Visited on 2024-06-15. Amazing!"
@@ -332,6 +381,7 @@ curl -X PATCH "http://localhost:8000/projects/1/places/1" \
 ```bash
 curl -X PATCH "http://localhost:8000/projects/1" \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-api-key-12345" \
   -d '{
     "name": "Updated Chicago Art Tour",
     "description": "Updated description"
@@ -341,7 +391,8 @@ curl -X PATCH "http://localhost:8000/projects/1" \
 ### Видалити проект
 
 ```bash
-curl -X DELETE "http://localhost:8000/projects/1"
+curl -X DELETE "http://localhost:8000/projects/1" \
+  -H "X-API-Key: dev-api-key-12345"
 ```
 
 **Помилка якщо є відвідані місця:**
@@ -390,6 +441,7 @@ test_task_crewred/
 ├── docker-compose.yml      # Docker Compose конфігурація
 ├── .dockerignore           # Файли для ігнорування в Docker
 ├── .gitignore              # Файли для ігнорування в Git
+├── .env.example            # Приклад конфігурації (скопіюйте в .env)
 ├── requirements.txt        # Python залежності
 └── README.md               # Документація
 ```
@@ -436,6 +488,8 @@ HTTP Response ← Route ← Service ← CRUD ← Model ← Database
 - `200 OK` - Успішний запит
 - `201 Created` - Ресурс успішно створено
 - `204 No Content` - Ресурс успішно видалено
+- `401 Unauthorized` - Відсутній або невалідний API Key
+- `403 Forbidden` - Невалідний API Key
 - `404 Not Found` - Ресурс не знайдено
 - `409 Conflict` - Конфлікт (місце вже існує, досягнуто ліміт, неможливо видалити)
 - `422 Unprocessable Entity` - Помилка валідації даних

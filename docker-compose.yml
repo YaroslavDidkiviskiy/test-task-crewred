@@ -11,6 +11,8 @@ services:
       - ./data:/app/data
     environment:
       - DATABASE_URL=sqlite:///./data/app.db
+      - API_KEY=${API_KEY:-dev-api-key-12345}
+      - PYTHONUNBUFFERED=1
     working_dir: /app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped

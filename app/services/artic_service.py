@@ -1,12 +1,11 @@
 import httpx
 import logging
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-BASE = "https://api.artic.edu/api/v1"
-
 async def get_artwork(external_id: str) -> dict | None:
-    url = f"{BASE}/artworks/{external_id}"
+    url = f"{settings.artic_api_base_url}/artworks/{external_id}"
     async with httpx.AsyncClient(timeout=10) as client:
         try:
             r = await client.get(url)
