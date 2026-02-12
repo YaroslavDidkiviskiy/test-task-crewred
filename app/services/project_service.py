@@ -75,11 +75,9 @@ def update_place(db: Session, project: Project, place: ProjectPlace, notes, visi
         place.visited = visited
         place.visited_at = datetime.utcnow() if visited else None
 
-    db.commit()
-    db.refresh(place)
-
     db.refresh(project)
     recompute_completed(project)
     db.commit()
+    db.refresh(place)
 
     return place

@@ -1,7 +1,13 @@
+from __future__ import annotations
+
 from datetime import date
+from typing import TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Text, Boolean, Date
 from app.core.db import Base
+
+if TYPE_CHECKING:
+    from app.models.place import ProjectPlace
 
 class Project(Base):
     __tablename__ = "projects"

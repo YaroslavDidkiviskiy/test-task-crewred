@@ -1,4 +1,7 @@
 import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 BASE = "https://api.artic.edu/api/v1"
 
@@ -8,6 +11,7 @@ async def get_artwork(external_id: str) -> dict | None:
         try:
             r = await client.get(url)
         except httpx.RequestError as e:
+            logger.warning(f"Failed to fetch artwork {external_id} from ArtIC API: {e}")
             return None
 
     if r.status_code == 200:
