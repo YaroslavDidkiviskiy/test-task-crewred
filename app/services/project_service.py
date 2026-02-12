@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Project, ProjectPlace
@@ -73,7 +73,7 @@ def update_place(db: Session, project: Project, place: ProjectPlace, notes, visi
 
     if visited is not None:
         place.visited = visited
-        place.visited_at = datetime.utcnow() if visited else None
+        place.visited_at = datetime.now(timezone.utc) if visited else None
 
     db.refresh(project)
     recompute_completed(project)
