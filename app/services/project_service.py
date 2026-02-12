@@ -41,7 +41,7 @@ async def create_project_with_places(db: Session, project: Project, places_paylo
             notes=p.notes,
         ))
 
-    return project_crud.create(db, project)
+    return create(db, project)
 
 async def add_place(db: Session, project: Project, external_id: str, notes: str | None):
     if place_crud.count_for_project(db, project.id) >= MAX_PLACES:

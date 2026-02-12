@@ -5,7 +5,7 @@ from app.deps.auth import verify_api_key
 from app.schemas import ProjectCreate, ProjectUpdate, ProjectOut, ProjectDetailOut
 from app.models import Project
 from app.crud import project as project_crud
-from app.crud.base import get
+from app.crud.base import get, delete
 from app.services.project_service import can_delete, create_project_with_places
 
 router = APIRouter(dependencies=[Depends(verify_api_key)])
@@ -236,5 +236,5 @@ def delete_project(project_id: int = Path(..., description="ID of the project to
         raise HTTPException(404, "Project not found")
     if not can_delete(project):
         raise HTTPException(409, "Cannot delete project with visited places")
-    project_crud.delete(db, project)
+    delete(db, project)
     return None
